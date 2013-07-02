@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C8B6CC12-30B1-4D57-B48E-7597C12D6F6B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mp3net</RootNamespace>
+    <AssemblyName>Mp3net</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AbstractID3v2FrameData.cs" />
+    <Compile Include="AbstractID3v2Tag.cs" />
+    <Compile Include="BaseException.cs" />
+    <Compile Include="BufferTools.cs" />
+    <Compile Include="ByteBufferUtils.cs" />
+    <Compile Include="EncodedText.cs" />
+    <Compile Include="FileWrapper.cs" />
+    <Compile Include="Helpers\Arrays.cs" />
+    <Compile Include="Helpers\BitConverter.cs" />
+    <Compile Include="Helpers\ByteBuffer.cs" />
+    <Compile Include="Helpers\ByteOrder.cs" />
+    <Compile Include="Helpers\CharBuffer.cs" />
+    <Compile Include="Helpers\CharSequence.cs" />
+    <Compile Include="Helpers\CharsetDecoder.cs" />
+    <Compile Include="Helpers\CharsetEncoder.cs" />
+    <Compile Include="Helpers\CodingErrorAction.cs" />
+    <Compile Include="Helpers\Collections.cs" />
+    <Compile Include="Helpers\EnumeratorWrapper.cs" />
+    <Compile Include="Helpers\Exceptions.cs" />
+    <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Helpers\FileChannel.cs" />
+    <Compile Include="Helpers\FileHelper.cs" />
+    <Compile Include="Helpers\FileInputStream.cs" />
+    <Compile Include="Helpers\FileLock.cs" />
+    <Compile Include="Helpers\FilenameFilter.cs" />
+    <Compile Include="Helpers\FileOutputStream.cs" />
+    <Compile Include="Helpers\FilePath.cs" />
+    <Compile Include="Helpers\FileReader.cs" />
+    <Compile Include="Helpers\FileWriter.cs" />
+    <Compile Include="Helpers\FilterInputStream.cs" />
+    <Compile Include="Helpers\FilterOutputStream.cs" />
+    <Compile Include="Helpers\InputStream.cs" />
+    <Compile Include="Helpers\InputStreamReader.cs" />
+    <Compile Include="Helpers\Iterable.cs" />
+    <Compile Include="Helpers\Iterator.cs" />
+    <Compile Include="Helpers\ListIterator.cs" />
+    <Compile Include="Helpers\MappedByteBuffer.cs" />
+    <Compile Include="Helpers\OutputStream.cs" />
+    <Compile Include="Helpers\RandomAccessFile.cs" />
+    <Compile Include="Helpers\Runtime.cs" />
+    <Compile Include="Helpers\WrappedSystemStream.cs" />
+    <Compile Include="ID3v1.cs" />
+    <Compile Include="ID3v1Genres.cs" />
+    <Compile Include="ID3v1Tag.cs" />
+    <Compile Include="ID3v2.cs" />
+    <Compile Include="ID3v22Tag.cs" />
+    <Compile Include="ID3v23Tag.cs" />
+    <Compile Include="ID3v24Frame.cs" />
+    <Compile Include="ID3v24Tag.cs" />
+    <Compile Include="ID3v2ChapterFrameData.cs" />
+    <Compile Include="ID3v2ChapterTOCFrameData.cs" />
+    <Compile Include="ID3v2CommentFrameData.cs" />
+    <Compile Include="ID3v2Frame.cs" />
+    <Compile Include="ID3v2FrameSet.cs" />
+    <Compile Include="ID3v2ObseleteFrame.cs" />
+    <Compile Include="ID3v2ObseletePictureFrameData.cs" />
+    <Compile Include="ID3v2PictureFrameData.cs" />
+    <Compile Include="ID3v2TagFactory.cs" />
+    <Compile Include="ID3v2TextFrameData.cs" />
+    <Compile Include="ID3v2UrlFrameData.cs" />
+    <Compile Include="ID3Wrapper.cs" />
+    <Compile Include="InvalidDataException.cs" />
+    <Compile Include="Mp3File.cs" />
+    <Compile Include="MpegFrame.cs" />
+    <Compile Include="MutableInteger.cs" />
+    <Compile Include="NoSuchTagException.cs" />
+    <Compile Include="NotSupportedException.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnsupportedTagException.cs" />
+    <Compile Include="Version.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
