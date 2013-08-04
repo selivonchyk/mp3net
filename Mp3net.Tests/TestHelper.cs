@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text;
 using Mp3net.Helpers;
 using NUnit.Framework;
@@ -17,8 +18,7 @@ namespace Mp3net
 				{
 					hexString.Append(' ');
 				}
-				string hex = Mp3net.Helpers.Extensions.ToHexString(unchecked((int)(0xff)) & bytes
-					[i]);
+				string hex =  Convert.ToString (unchecked((int)(0xff)) & bytes [i], 16);
 				if (hex.Length == 1)
 				{
 					hexString.Append('0');
@@ -41,17 +41,30 @@ namespace Mp3net
 
 		public static byte[] LoadFile(string filename)
 		{
-			RandomAccessFile file = new RandomAccessFile(filename, "r");
-			byte[] buffer = new byte[(int)file.Length()];
-			file.Read(buffer);
-			file.Close();
+			Stream stream = new FileStream (filename, System.IO.FileMode.Open, FileAccess.Read);
+			byte[] buffer = new byte[(int)stream.Length];
+			stream.Read(buffer, 0, buffer.Length);
+			stream.Close();
 			return buffer;
 		}
 
 		public static void DeleteFile(string filename)
 		{
-			FilePath file = new FilePath(filename);
-			file.Delete();
+			try {
+				if (File.Exists(filename))
+				{
+					// make file writable
+					FileAttributes fileAttributes = File.GetAttributes (filename);
+					if ((fileAttributes & FileAttributes.ReadOnly) != 0) {
+						fileAttributes &= ~FileAttributes.ReadOnly;
+						File.SetAttributes (filename, fileAttributes);
+					}
+					
+					File.Delete (filename);				
+				}
+			} catch (Exception exception) {
+				Console.WriteLine (exception);
+			}
 		}
 
 		public static void ReplaceSpacesWithNulls(byte[] buffer)

@@ -116,11 +116,10 @@ namespace Mp3net
 		}
 
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		public MpegFrame(byte frameData1, byte frameData2, byte frameData3, byte frameData4
-			)
+		public MpegFrame(byte frameData1, byte frameData2, byte frameData3, byte frameData4)
 		{
-			long frameHeader = BufferTools.UnpackInteger(frameData1, frameData2, frameData3, 
-				frameData4);
+			long frameHeader = BufferTools.UnpackInteger(frameData1, frameData2, frameData3, frameData4);
+            System.Console.WriteLine("FrameHeader: {0}", (uint)frameHeader);
 			SetFields(frameHeader);
 		}
 
@@ -167,6 +166,7 @@ namespace Mp3net
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
 		private void SetVersion(int version)
 		{
+            System.Console.WriteLine("Version: {0}", version);
 			switch (version)
 			{
 				case 0:
@@ -192,11 +192,13 @@ namespace Mp3net
 					throw new InvalidDataException("Invalid mpeg audio version in frame header");
 				}
 			}
+            System.Console.WriteLine("Version: {0}", this.version);
 		}
 
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
 		private void SetLayer(int layer)
 		{
+            System.Console.WriteLine("Layer: {0}", layer);
 			switch (layer)
 			{
 				case 1:
@@ -232,6 +234,7 @@ namespace Mp3net
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
 		private void SetBitRate(int bitrate)
 		{
+            System.Console.WriteLine("BiRate: {0}, version: {1}", bitrate, version);
 			if (MPEG_VERSION_1_0.Equals(version))
 			{
 				if (layer == 1)
@@ -701,6 +704,7 @@ namespace Mp3net
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
 		private void SetSampleRate(int sampleRate)
 		{
+            System.Console.WriteLine("SampleRate: {0}, version: {1}", sampleRate, version);
 			if (MPEG_VERSION_1_0.Equals(version))
 			{
 				switch (sampleRate)

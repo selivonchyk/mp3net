@@ -20,11 +20,6 @@ namespace Mp3net.Helpers
 			return Environment.ProcessorCount;
 		}
 
-		internal static long CurrentTimeMillis ()
-		{
-			return DateTime.UtcNow.ToMillisecondsSinceEpoch ();
-		}
-
         internal static string Getenv (string var)
 		{
 			return Environment.GetEnvironmentVariable (var);
@@ -194,7 +189,7 @@ namespace Mp3net.Helpers
 
 		internal static string GetStringForBytes (byte[] chars, int start, int len, string encoding)
 		{
-			return GetEncoding (encoding).Decode (chars, start, len);
+			return Decode (GetEncoding (encoding), chars, start, len);
 		}
 		
 		internal static Encoding GetEncoding (string name)
@@ -205,5 +200,29 @@ namespace Mp3net.Helpers
 				return new UTF8Encoding (false, true);
 			return e;
 		}
+
+		internal static string Decode (Encoding e, byte[] chars, int start, int len)
+		{
+			try {
+				byte[] bom = e.GetPreamble ();
+				if (bom != null && bom.Length > 0) {
+					if (len >= bom.Length) {
+						int pos = start;
+						bool hasBom = true;
+						for (int n=0; n<bom.Length && hasBom; n++) {
+							if (bom[n] != chars [pos++])
+								hasBom = false;
+						}
+						if (hasBom) {
+							len -= pos - start;
+							start = pos;
+						}
+					}
+				}
+				return e.GetString (chars, start, len);
+			} catch (DecoderFallbackException) {
+				throw new CharacterCodingException ();
+			}
+		}		
 	}
 }

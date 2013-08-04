@@ -28,7 +28,7 @@ namespace Mp3net
 
 		public virtual void AddFrame(ID3v2Frame frame)
 		{
-			frames.AddItem(frame);
+			frames.Add(frame);
 		}
 
 		public virtual IList<ID3v2Frame> GetFrames()

@@ -16,7 +16,7 @@ namespace Mp3net.Helpers
 
 		public string Decode (ByteBuffer b)
 		{
-			string res = enc.Decode (b);
+			string res = Runtime.Decode(enc, b.Array(), b.ArrayOffset () + b.Position (), b.Limit () - b.Position ());
 			if (res.IndexOf ('\uFFFD') != -1 && decoder.Fallback == DecoderFallback.ExceptionFallback)
 				throw new CharacterCodingException ();
 			return res;

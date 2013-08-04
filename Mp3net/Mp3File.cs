@@ -5,7 +5,7 @@ using Mp3net.Helpers;
 
 namespace Mp3net
 {
-	public class Mp3File : FileWrapper
+	public class Mp3File
 	{
 		private const int DEFAULT_BUFFER_LENGTH = 65536;
 
@@ -27,8 +27,7 @@ namespace Mp3net
 
 		private int frameCount = 0;
 
-		private IDictionary<int, MutableInteger> bitrates = new Dictionary<int, MutableInteger
-			>();
+		private IDictionary<int, MutableInteger> bitrates = new Dictionary<int, MutableInteger>();
 
 		private int xingBitrate;
 
@@ -58,6 +57,14 @@ namespace Mp3net
 
 		private bool scanFile;
 
+        private string filename;
+
+        private long length;
+
+        private DateTime lastModified;
+
+        private Stream stream;
+
 		public Mp3File()
 		{
 		}
@@ -72,66 +79,135 @@ namespace Mp3net
 		/// <exception cref="System.IO.IOException"></exception>
 		/// <exception cref="Mp3net.UnsupportedTagException"></exception>
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		public Mp3File(string filename, int bufferLength) : this(filename, bufferLength, 
-			true)
+		public Mp3File(string filename, int bufferLength) : this(filename, bufferLength, true)
 		{
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
 		/// <exception cref="Mp3net.UnsupportedTagException"></exception>
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		public Mp3File(string filename, bool scanFile) : this(filename, DEFAULT_BUFFER_LENGTH
-			, scanFile)
+		public Mp3File(string filename, bool scanFile) : this(filename, DEFAULT_BUFFER_LENGTH, scanFile)
 		{
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
 		/// <exception cref="Mp3net.UnsupportedTagException"></exception>
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		public Mp3File(string filename, int bufferLength, bool scanFile) : base(filename)
+		public Mp3File(string filename, int bufferLength, bool scanFile)
 		{
+            if (String.IsNullOrEmpty(filename))
+            {
+                throw new ArgumentNullException("File name can not be null.");
+            }
+            this.filename = filename;
+
 			if (bufferLength < MINIMUM_BUFFER_LENGTH + 1)
 			{
 				throw new ArgumentException("Buffer too small");
 			}
 			this.bufferLength = bufferLength;
 			this.scanFile = scanFile;
-			Init();
+			InitFile();
 		}
 
+        public Mp3File(Stream stream) : this(stream, DEFAULT_BUFFER_LENGTH, true)
+        {
+        }
+
+        public Mp3File(Stream stream, int bufferLength) : this(stream, bufferLength, true)
+        {
+        }
+
+        public Mp3File(Stream stream, bool scanFile) : this(stream, DEFAULT_BUFFER_LENGTH, scanFile)
+        {
+        }
+
+        public Mp3File(Stream stream, int bufferLength, bool scanFile)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException("Stream can not be null.");
+            }
+            this.stream = stream;
+
+            if (bufferLength < MINIMUM_BUFFER_LENGTH + 1)
+            {
+                throw new ArgumentException("Buffer too small");
+            }
+            this.bufferLength = bufferLength;
+            this.scanFile = scanFile;
+            InitStream();
+        }
+
+        public virtual string GetFilename()
+        {
+            return filename;
+        }
+
+        public virtual long GetLength()
+        {
+            return length;
+        }
+
+        public virtual DateTime GetLastModified()
+        {
+            return lastModified;
+        }
+		
 		/// <exception cref="System.IO.IOException"></exception>
 		/// <exception cref="Mp3net.UnsupportedTagException"></exception>
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		private void Init()
+		private void InitFile()
 		{
-			RandomAccessFile file = new RandomAccessFile(filename, "r");
-			try
-			{
-				InitId3v1Tag(file);
-				ScanFile(file);
-				if (startOffset < 0)
-				{
-					throw new InvalidDataException("No mpegs frames found");
-				}
-				InitId3v2Tag(file);
-				if (scanFile)
-				{
-					InitCustomTag(file);
-				}
-			}
-			finally
-			{
-				file.Close();
-			}
+            FileInfo file = new FileInfo(filename);
+            if (!file.Exists)
+            {
+                throw new FileNotFoundException("File not found " + filename);
+            }
+            length = file.Length;
+            lastModified = file.LastWriteTime;
+
+            /*
+            if (!file.CanRead())
+            {
+                throw new IOException("File not readable");
+            }
+            */
+
+			stream = new FileStream (filename, System.IO.FileMode.Open, FileAccess.Read);
+
+            InitStream();
 		}
 
-		internal virtual int PreScanFile(RandomAccessFile file)
+        private void InitStream()
+        {
+            try
+            {
+                InitId3v1Tag(stream);
+                ScanFile(stream);
+                if (startOffset < 0)
+                {
+                    throw new InvalidDataException("No mpegs frames found");
+                }
+                InitId3v2Tag(stream);
+                if (scanFile)
+                {
+                    InitCustomTag(stream);
+                }
+            }
+            finally
+            {
+                stream.Close();
+            }
+        }
+
+		internal virtual int PreScanFile(Stream stream)
 		{
 			byte[] bytes = new byte[AbstractID3v2Tag.HEADER_LENGTH];
 			try
 			{
-				file.Seek(0);
-				int bytesRead = file.Read(bytes, 0, AbstractID3v2Tag.HEADER_LENGTH);
+				stream.Position = 0;
+				int bytesRead = stream.Read(bytes, 0, AbstractID3v2Tag.HEADER_LENGTH);
 				if (bytesRead == AbstractID3v2Tag.HEADER_LENGTH)
 				{
 					try
@@ -161,16 +237,16 @@ namespace Mp3net
 
 		/// <exception cref="System.IO.IOException"></exception>
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		private void ScanFile(RandomAccessFile file)
+		private void ScanFile(Stream stream)
 		{
 			byte[] bytes = new byte[bufferLength];
-			int fileOffset = PreScanFile(file);
-			file.Seek(fileOffset);
+			int fileOffset = PreScanFile(stream);
+			stream.Position = fileOffset;
 			bool lastBlock = false;
 			int lastOffset = fileOffset;
 			while (!lastBlock)
 			{
-				int bytesRead = file.Read(bytes, 0, bufferLength);
+				int bytesRead = stream.Read(bytes, 0, bufferLength);
 				if (bytesRead < bufferLength)
 				{
 					lastBlock = true;
@@ -193,7 +269,7 @@ namespace Mp3net
 							}
 							offset = ScanBlock(bytes, bytesRead, fileOffset, offset);
 							fileOffset += offset;
-							file.Seek(fileOffset);
+							stream.Position = fileOffset;
 							break;
 						}
 						catch (InvalidDataException e)
@@ -210,7 +286,7 @@ namespace Mp3net
 								{
 									throw new InvalidDataException("Valid start of mpeg frames not found", e);
 								}
-								file.Seek(fileOffset);
+								stream.Position = fileOffset;
 								break;
 							}
 							return;
@@ -220,24 +296,24 @@ namespace Mp3net
 			}
 		}
 
-		private int ScanBlockForStart(byte[] bytes, int bytesRead, int absoluteOffset, int
-			 offset)
+		private int ScanBlockForStart(byte[] bytes, int bytesRead, int absoluteOffset, int offset)
 		{
+            Console.WriteLine("ScanBlockForStart: offset: {0}, absoluteOffset: {1}", offset, absoluteOffset);
 			while (offset < bytesRead - MINIMUM_BUFFER_LENGTH)
 			{
-				if (bytes[offset] == unchecked((byte)unchecked((int)(0xFF))) && (bytes[offset + 1
-					] & unchecked((byte)unchecked((int)(0xE0)))) == unchecked((byte)unchecked((int)(
-					0xE0))))
+				if (bytes[offset] == unchecked((byte)unchecked((int)(0xFF))) &&
+                    (bytes[offset + 1] & unchecked((byte)unchecked((int)(0xE0)))) == unchecked((byte)unchecked((int)(0xE0))))
 				{
 					try
 					{
-						MpegFrame frame = new MpegFrame(bytes[offset], bytes[offset + 1], bytes[offset + 
-							2], bytes[offset + 3]);
+                        Console.WriteLine("Mpeg frame start bytes: {0}, {1}, {2}, {3}", bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+						MpegFrame frame = new MpegFrame(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
 						if (xingOffset < 0 && IsXingFrame(bytes, offset))
 						{
 							xingOffset = absoluteOffset + offset;
 							xingBitrate = frame.GetBitrate();
 							offset += frame.GetLengthInBytes();
+                            Console.WriteLine("frame length: {0}, xingOffset: {1}, offset: {2}, absoluteOffset: {3}", frame.GetLengthInBytes(), xingOffset, offset, absoluteOffset);
 						}
 						else
 						{
@@ -253,6 +329,7 @@ namespace Mp3net
 							frameCount++;
 							AddBitrate(frame.GetBitrate());
 							offset += frame.GetLengthInBytes();
+                            Console.WriteLine("frame length: {0}, offset: {1}, absoluteOffset: {2}", frame.GetLengthInBytes(), offset, absoluteOffset);
 							return offset;
 						}
 					}
@@ -270,13 +347,11 @@ namespace Mp3net
 		}
 
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		private int ScanBlock(byte[] bytes, int bytesRead, int absoluteOffset, int offset
-			)
+		private int ScanBlock(byte[] bytes, int bytesRead, int absoluteOffset, int offset)
 		{
 			while (offset < bytesRead - MINIMUM_BUFFER_LENGTH)
 			{
-				MpegFrame frame = new MpegFrame(bytes[offset], bytes[offset + 1], bytes[offset + 
-					2], bytes[offset + 3]);
+				MpegFrame frame = new MpegFrame(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
 				SanityCheckFrame(frame, absoluteOffset + offset);
 				int newEndOffset = absoluteOffset + offset + frame.GetLengthInBytes() - 1;
 				if (newEndOffset < GetMaxEndOffset())
@@ -372,24 +447,24 @@ namespace Mp3net
 		private void AddBitrate(int bitrate)
 		{
 			int key = bitrate;
-			MutableInteger count = bitrates.Get(key);
-			if (count != null)
+            MutableInteger count = null;
+            if (bitrates.TryGetValue(key, out count) && count != null)
 			{
 				count.Increment();
 			}
 			else
 			{
-				bitrates.Put(key, new MutableInteger(1));
+				bitrates[key] = new MutableInteger(1);
 			}
 			this.bitrate = ((this.bitrate * (frameCount - 1)) + bitrate) / frameCount;
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		private void InitId3v1Tag(RandomAccessFile file)
+		private void InitId3v1Tag(Stream stream)
 		{
 			byte[] bytes = new byte[ID3v1Tag.TAG_LENGTH];
-			file.Seek(GetLength() - ID3v1Tag.TAG_LENGTH);
-			int bytesRead = file.Read(bytes, 0, ID3v1Tag.TAG_LENGTH);
+			stream.Position = GetLength() - ID3v1Tag.TAG_LENGTH;
+			int bytesRead = stream.Read(bytes, 0, ID3v1Tag.TAG_LENGTH);
 			if (bytesRead < ID3v1Tag.TAG_LENGTH)
 			{
 				throw new IOException("Not enough bytes read");
@@ -407,7 +482,7 @@ namespace Mp3net
 		/// <exception cref="System.IO.IOException"></exception>
 		/// <exception cref="Mp3net.UnsupportedTagException"></exception>
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		private void InitId3v2Tag(RandomAccessFile file)
+		private void InitId3v2Tag(Stream stream)
 		{
 			if (xingOffset == 0 || startOffset == 0)
 			{
@@ -425,8 +500,8 @@ namespace Mp3net
 					bufferLength = startOffset;
 				}
 				byte[] bytes = new byte[bufferLength];
-				file.Seek(0);
-				int bytesRead = file.Read(bytes, 0, bufferLength);
+				stream.Position = 0;
+				int bytesRead = stream.Read(bytes, 0, bufferLength);
 				if (bytesRead < bufferLength)
 				{
 					throw new IOException("Not enough bytes read");
@@ -443,7 +518,7 @@ namespace Mp3net
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		private void InitCustomTag(RandomAccessFile file)
+		private void InitCustomTag(Stream stream)
 		{
 			int bufferLength = (int)(GetLength() - (endOffset + 1));
 			if (HasId3v1Tag())
@@ -457,8 +532,8 @@ namespace Mp3net
 			else
 			{
 				customTag = new byte[bufferLength];
-				file.Seek(endOffset + 1);
-				int bytesRead = file.Read(customTag, 0, bufferLength);
+				stream.Position = endOffset + 1;
+				int bytesRead = stream.Read(customTag, 0, bufferLength);
 				if (bytesRead < bufferLength)
 				{
 					throw new IOException("Not enough bytes read");
@@ -629,32 +704,34 @@ namespace Mp3net
 		    if (String.Equals(filename, newFilename, StringComparison.OrdinalIgnoreCase))
 		    {
                 throw new ArgumentException("Save filename same as source filename");
-		    }
-			RandomAccessFile saveFile = new RandomAccessFile(newFilename, "rw");
+		    }		    
+			Stream saveStream = new FileStream (newFilename, System.IO.FileMode.OpenOrCreate, FileAccess.ReadWrite);
 			try
 			{
 				if (HasId3v2Tag())
 				{
-					saveFile.Write(id3v2Tag.ToBytes());
+					byte[] buffer = id3v2Tag.ToBytes();
+					saveStream.Write(buffer, 0, buffer.Length);
 				}
-				SaveMpegFrames(saveFile);
+				SaveMpegFrames(saveStream);
 				if (HasCustomTag())
 				{
-					saveFile.Write(customTag);
+					saveStream.Write(customTag, 0, customTag.Length);
 				}
 				if (HasId3v1Tag())
 				{
-					saveFile.Write(id3v1Tag.ToBytes());
+					byte[] buffer = id3v1Tag.ToBytes();
+					saveStream.Write(buffer, 0, buffer.Length);
 				}
 			}
 			finally
 			{
-				saveFile.Close();
+				saveStream.Close();
 			}
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		private void SaveMpegFrames(RandomAccessFile saveFile)
+		private void SaveMpegFrames(Stream saveStream)
 		{
 			int filePos = xingOffset;
 			if (filePos < 0)
@@ -669,29 +746,29 @@ namespace Mp3net
 			{
 				return;
 			}
-			RandomAccessFile file = new RandomAccessFile(filename, "r");
+			Stream stream = new FileStream (filename, System.IO.FileMode.Open, FileAccess.Read);
 			byte[] bytes = new byte[bufferLength];
 			try
 			{
-				file.Seek(filePos);
+				stream.Position = filePos;
 				while (true)
 				{
-					int bytesRead = file.Read(bytes, 0, bufferLength);
+					int bytesRead = stream.Read(bytes, 0, bufferLength);
 					if (filePos + bytesRead <= endOffset)
 					{
-						saveFile.Write(bytes, 0, bytesRead);
+						saveStream.Write(bytes, 0, bytesRead);
 						filePos += bytesRead;
 					}
 					else
 					{
-						saveFile.Write(bytes, 0, endOffset - filePos + 1);
+						saveStream.Write(bytes, 0, endOffset - filePos + 1);
 						break;
 					}
 				}
 			}
 			finally
 			{
-				file.Close();
+				stream.Close();
 			}
 		}
 	}

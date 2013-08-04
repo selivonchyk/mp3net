@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Mp3net.Helpers;
+using Ude;
 
 namespace Mp3net
 {
@@ -22,18 +23,33 @@ namespace Mp3net
 
 		public static readonly string CHARSET_UTF_8 = "UTF-8";
 
-		private static readonly string[] characterSets = new string[] { CHARSET_ISO_8859_1
-			, CHARSET_UTF_16, CHARSET_UTF_16BE, CHARSET_UTF_8 };
+		private static readonly string[] characterSets = new string[] {
+            CHARSET_ISO_8859_1, 
+            CHARSET_UTF_16, 
+            CHARSET_UTF_16BE, 
+            CHARSET_UTF_8
+        };
 
 		private static readonly byte[] textEncodingFallback = new byte[] { 0, 2, 1, 3 };
 
-		private static readonly byte[][] boms = new byte[][] { new byte[] {  }, new byte[
-			] { unchecked((byte)unchecked((int)(0xff))), unchecked((byte)unchecked((int)(0xfe
-			))) }, new byte[] { unchecked((byte)unchecked((int)(0xfe))), unchecked((byte)unchecked(
-			(int)(0xff))) }, new byte[] {  } };
+		private static readonly byte[][] boms = new byte[][] { 
+            new byte[] {  }, 
+            new byte[] { 
+                unchecked((byte)unchecked((int)(0xff))), 
+                unchecked((byte)unchecked((int)(0xfe))) 
+            }, 
+            new byte[] { 
+                unchecked((byte)unchecked((int)(0xfe))), 
+                unchecked((byte)unchecked((int)(0xff))) 
+            }, 
+            new byte[] {  } 
+        };
 
-		private static readonly byte[][] terminators = new byte[][] { new byte[] { 0 }, new 
-			byte[] { 0, 0 }, new byte[] { 0, 0 }, new byte[] { 0 } };
+		private static readonly byte[][] terminators = new byte[][] { 
+            new byte[] { 0 }, 
+            new byte[] { 0, 0 }, 
+            new byte[] { 0, 0 }, 
+            new byte[] { 0 } };
 
 		private byte[] value;
 
@@ -59,8 +75,7 @@ namespace Mp3net
 					return;
 				}
 			}
-			throw new ArgumentException("Invalid string, could not find appropriate encoding"
-				);
+			throw new ArgumentException("Invalid string, could not find appropriate encoding");
 		}
 
 		/// <exception cref="System.ArgumentException"></exception>
@@ -77,8 +92,7 @@ namespace Mp3net
 			this.StripBomAndTerminator();
 		}
 
-		public EncodedText(byte[] value) : this(TextEncodingForBytesFromBOM(value), value
-			)
+		public EncodedText(byte[] value) : this(TextEncodingForBytesFromBOM(value), value)
 		{
 		}
 
@@ -127,18 +141,18 @@ namespace Mp3net
 		private void StripBomAndTerminator()
 		{
 			int leadingCharsToRemove = 0;
-			if (value.Length >= 2 && ((value[0] == unchecked((byte)unchecked((int)(0xfe))) &&
-				 value[1] == unchecked((byte)unchecked((int)(0xff)))) || (value[0] == unchecked(
-				(byte)unchecked((int)(0xff))) && value[1] == unchecked((byte)unchecked((int)(0xfe
-				))))))
+			if (value.Length >= 2 &&
+                ((value[0] == unchecked((byte)unchecked((int)(0xfe))) && value[1] == unchecked((byte)unchecked((int)(0xff)))) ||
+                 (value[0] == unchecked((byte)unchecked((int)(0xff))) && value[1] == unchecked((byte)unchecked((int)(0xfe))))))
 			{
 				leadingCharsToRemove = 2;
 			}
 			else
 			{
-				if (value.Length >= 3 && (value[0] == unchecked((byte)unchecked((int)(0xef))) && 
-					value[1] == unchecked((byte)unchecked((int)(0xbb))) && value[2] == unchecked((byte
-					)unchecked((int)(0xbf)))))
+				if (value.Length >= 3 &&
+                    (value[0] == unchecked((byte)unchecked((int)(0xef))) &&
+                    value[1] == unchecked((byte)unchecked((int)(0xbb))) &&
+                    value[2] == unchecked((byte)unchecked((int)(0xbf)))))
 				{
 					leadingCharsToRemove = 3;
 				}
@@ -189,7 +203,7 @@ namespace Mp3net
 		{
 			if (this.textEncoding != textEncoding)
 			{
-				CharBuffer charBuffer = BytesToCharBuffer(this.value, CharacterSetForTextEncoding(this.textEncoding));
+				string charBuffer = BytesToCharBuffer(this.value, CharacterSetForTextEncoding(this.textEncoding));
 				byte[] transcodedBytes = CharBufferToBytes(charBuffer, CharacterSetForTextEncoding
 					(textEncoding));
 				this.textEncoding = textEncoding;
@@ -256,7 +270,8 @@ namespace Mp3net
 		{
 			try
 			{
-				return BytesToString(value, CharacterSetForTextEncoding(textEncoding));
+                string charsetName = textEncoding == 0 ? DetectCharset() : CharacterSetForTextEncoding(textEncoding);
+                return BytesToString(value, charsetName);
 			}
 			catch (CharacterCodingException)
 			{
@@ -294,8 +309,7 @@ namespace Mp3net
 		/// <exception cref="Mp3net.Helpers.CharacterCodingException"></exception>
 		public static string BytesToString(byte[] bytes, string characterSet)
 		{
-			CharBuffer cbuf = BytesToCharBuffer(bytes, characterSet);
-			string s = cbuf.ToString();
+			string s = BytesToCharBuffer(bytes, characterSet);
 			int length = s.IndexOf('\0');
 			if (length == -1)
 			{
@@ -305,19 +319,19 @@ namespace Mp3net
 		}
 
 		/// <exception cref="Mp3net.Helpers.CharacterCodingException"></exception>
-		internal static CharBuffer BytesToCharBuffer(byte[] bytes, string characterSet)
+		internal static string BytesToCharBuffer(byte[] bytes, string characterSet)
 		{
-			Encoding charset = Extensions.GetEncoding(characterSet);
+			Encoding charset = GetEncoding(characterSet);
 		    //char[] chars = charset.GetChars(bytes);
-			CharsetDecoder decoder = charset.NewDecoder();
-			return CharBuffer.Wrap(decoder.Decode(ByteBuffer.Wrap(bytes)));
+			CharsetDecoder decoder = new CharsetDecoder (charset);
+			return decoder.Decode(ByteBuffer.Wrap(bytes));
 		}
 
 		public static byte[] StringToBytes(string s, string characterSet)
 		{
 			try
 			{
-				return CharBufferToBytes(CharBuffer.Wrap(s), characterSet);
+				return CharBufferToBytes(s, characterSet);
 			}
 			catch (CharacterCodingException)
 			{
@@ -326,14 +340,39 @@ namespace Mp3net
 		}
 
 		/// <exception cref="Mp3net.Helpers.CharacterCodingException"></exception>
-		internal static byte[] CharBufferToBytes(CharBuffer charBuffer, string 
-			characterSet)
+		internal static byte[] CharBufferToBytes(string charBuffer, string characterSet)
 		{
-			Encoding charset = Mp3net.Helpers.Extensions.GetEncoding(characterSet);
-			CharsetEncoder encoder = charset.NewEncoder();
-			ByteBuffer byteBuffer = encoder.Encode(charBuffer);
-			return BufferTools.CopyBuffer(((byte[])byteBuffer.Array()), 0, byteBuffer.Limit()
-				);
+			Encoding charset = GetEncoding(characterSet);
+            byte[] byteBuffer = charset.GetBytes(charBuffer);
+            return BufferTools.CopyBuffer(byteBuffer, 0, byteBuffer.Length);
 		}
+
+		static UTF8Encoding UTF8Encoder = new UTF8Encoding (false, true);
+		public static Encoding GetEncoding (string name)
+		{
+//			Encoding e = Encoding.GetEncoding (name, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+			try {
+				Encoding e = Encoding.GetEncoding (name.Replace ('_','-'));
+				if (e is UTF8Encoding)
+					return UTF8Encoder;
+				return e;
+			} catch (ArgumentException) {
+				throw new UnsupportedCharsetException (name);
+			}
+		}
+
+        // detect value's charset using UDE (mozilla universal charset detector)
+        private string DetectCharset()
+        {
+            CharsetDetector detector = new CharsetDetector();
+            byte[] bytes = value;
+            detector.Feed(value, 1, value.Length - 1);
+            detector.DataEnd();
+
+            string charsetName = detector.Charset;
+            if (String.IsNullOrEmpty(charsetName))
+                charsetName = "ISO-8859-1";
+            return charsetName;
+        }		
 	}
 }

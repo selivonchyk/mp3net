@@ -36,6 +36,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Ude">
+      <HintPath>..\packages\UDE.CSharp.1.1.0\lib\Ude.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractID3v2FrameData.cs" />
@@ -44,41 +47,15 @@
     <Compile Include="BufferTools.cs" />
     <Compile Include="ByteBufferUtils.cs" />
     <Compile Include="EncodedText.cs" />
-    <Compile Include="FileWrapper.cs" />
     <Compile Include="Helpers\Arrays.cs" />
     <Compile Include="Helpers\BitConverter.cs" />
     <Compile Include="Helpers\ByteBuffer.cs" />
     <Compile Include="Helpers\ByteOrder.cs" />
-    <Compile Include="Helpers\CharBuffer.cs" />
-    <Compile Include="Helpers\CharSequence.cs" />
     <Compile Include="Helpers\CharsetDecoder.cs" />
-    <Compile Include="Helpers\CharsetEncoder.cs" />
     <Compile Include="Helpers\CodingErrorAction.cs" />
     <Compile Include="Helpers\Collections.cs" />
-    <Compile Include="Helpers\EnumeratorWrapper.cs" />
     <Compile Include="Helpers\Exceptions.cs" />
-    <Compile Include="Helpers\Extensions.cs" />
-    <Compile Include="Helpers\FileChannel.cs" />
-    <Compile Include="Helpers\FileHelper.cs" />
-    <Compile Include="Helpers\FileInputStream.cs" />
-    <Compile Include="Helpers\FileLock.cs" />
-    <Compile Include="Helpers\FilenameFilter.cs" />
-    <Compile Include="Helpers\FileOutputStream.cs" />
-    <Compile Include="Helpers\FilePath.cs" />
-    <Compile Include="Helpers\FileReader.cs" />
-    <Compile Include="Helpers\FileWriter.cs" />
-    <Compile Include="Helpers\FilterInputStream.cs" />
-    <Compile Include="Helpers\FilterOutputStream.cs" />
-    <Compile Include="Helpers\InputStream.cs" />
-    <Compile Include="Helpers\InputStreamReader.cs" />
-    <Compile Include="Helpers\Iterable.cs" />
-    <Compile Include="Helpers\Iterator.cs" />
-    <Compile Include="Helpers\ListIterator.cs" />
-    <Compile Include="Helpers\MappedByteBuffer.cs" />
-    <Compile Include="Helpers\OutputStream.cs" />
-    <Compile Include="Helpers\RandomAccessFile.cs" />
     <Compile Include="Helpers\Runtime.cs" />
-    <Compile Include="Helpers\WrappedSystemStream.cs" />
     <Compile Include="ID3v1.cs" />
     <Compile Include="ID3v1Genres.cs" />
     <Compile Include="ID3v1Tag.cs" />

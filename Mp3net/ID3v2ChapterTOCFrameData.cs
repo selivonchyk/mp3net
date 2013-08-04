@@ -62,13 +62,13 @@ namespace Mp3net
 			{
 				ID3v2Frame frame = new ID3v2Frame(bytes, offset);
 				offset += frame.GetLength();
-				subframes.AddItem(frame);
+				subframes.Add(frame);
 			}
 		}
 
 		public virtual void AddSubframe(string id, AbstractID3v2FrameData frame)
 		{
-			subframes.AddItem(new ID3v2Frame(id, frame.ToBytes()));
+			subframes.Add(new ID3v2Frame(id, frame.ToBytes()));
 		}
 
 		protected internal override byte[] PackFrameData()

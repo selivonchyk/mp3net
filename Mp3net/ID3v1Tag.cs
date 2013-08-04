@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Mp3net.Helpers;
+using Ude;
 
 namespace Mp3net
 {
@@ -70,12 +71,10 @@ namespace Mp3net
 		private void UnpackTag(byte[] bytes)
 		{
 			SanityCheckTag(bytes);
-			title = BufferTools.TrimStringRight(BufferTools.ByteBufferToStringIgnoringEncodingIssues
-				(bytes, TITLE_OFFSET, TITLE_LENGTH));
-			artist = BufferTools.TrimStringRight(BufferTools.ByteBufferToStringIgnoringEncodingIssues
-				(bytes, ARTIST_OFFSET, ARTIST_LENGTH));
-			album = BufferTools.TrimStringRight(BufferTools.ByteBufferToStringIgnoringEncodingIssues
-				(bytes, ALBUM_OFFSET, ALBUM_LENGTH));
+            string charsetName = DetectCharset(bytes, 0, bytes.Length);
+			title = BufferTools.TrimStringRight(BufferTools.ByteBufferToString(bytes, TITLE_OFFSET, TITLE_LENGTH, charsetName));
+			artist = BufferTools.TrimStringRight(BufferTools.ByteBufferToString(bytes, ARTIST_OFFSET, ARTIST_LENGTH, charsetName));
+			album = BufferTools.TrimStringRight(BufferTools.ByteBufferToString(bytes, ALBUM_OFFSET, ALBUM_LENGTH, charsetName));
 			year = BufferTools.TrimStringRight(BufferTools.ByteBufferToStringIgnoringEncodingIssues
 				(bytes, YEAR_OFFSET, YEAR_LENGTH));
 			genre = bytes[GENRE_OFFSET] & unchecked((int)(0xFF));
@@ -100,7 +99,7 @@ namespace Mp3net
 				}
 				else
 				{
-					track = Mp3net.Helpers.Extensions.ToString(trackInt);
+					track = trackInt.ToString();
 				}
 			}
 		}
@@ -446,5 +445,18 @@ namespace Mp3net
 			}
 			return true;
 		}
+
+        private string DetectCharset(byte[] bytes, int start, int length)
+        {
+            CharsetDetector detector = new CharsetDetector();
+
+            detector.Feed(bytes, start, length);
+            detector.DataEnd();
+
+            string charsetName = detector.Charset;
+            if (String.IsNullOrEmpty(charsetName))
+                charsetName = "ISO-8859-1";
+            return charsetName;
+        }
 	}
 }

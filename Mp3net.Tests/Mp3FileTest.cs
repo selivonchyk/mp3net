@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Mp3net.Helpers;
 using NUnit.Framework;
 
@@ -20,6 +21,75 @@ namespace Mp3net
 		private static readonly string NOT_AN_MP3 = "Resources/notanmp3.mp3";
 
 		private static readonly string MP3_WITH_INCOMPLETE_MPEG_FRAME = "Resources/incompletempegframe.mp3";
+
+        private static readonly string VALID_FILENAME = "Resources/notags.mp3";
+
+        private const long VALID_FILE_LENGTH = 2869;
+
+        private static readonly string NON_EXISTANT_FILENAME = "just-not.there";
+
+        private static readonly string MALFORMED_FILENAME = "malformed.?";
+
+        [TestCase]
+        public virtual void TestShouldReadValidFile()
+        {
+            Mp3File mp3File = new Mp3File(VALID_FILENAME);
+            Assert.AreEqual(mp3File.GetFilename(), VALID_FILENAME);
+            Assert.IsTrue(mp3File.GetLastModified().ToFileTime() > 0);
+            Assert.AreEqual(mp3File.GetLength(), VALID_FILE_LENGTH);
+        }
+
+        [TestCase]
+        public virtual void TestShouldFailForNonExistentFile()
+        {
+            try
+            {
+                new Mp3File(NON_EXISTANT_FILENAME);
+                Assert.Fail("FileNotFoundException expected but not thrown");
+            }
+            catch (FileNotFoundException)
+            {
+            }
+        }
+
+        [TestCase]
+        public virtual void TestShouldFailForMalformedFilename()
+        {
+            try
+            {
+                new Mp3File(MALFORMED_FILENAME);
+                Assert.Fail("ArgumentException expected but not thrown");
+            }
+            catch (ArgumentException)
+            {
+            }
+        }
+
+        [TestCase]
+        public virtual void TestShouldFailForNullFilename()
+        {
+            try
+            {
+                new Mp3File((String)null);
+                Assert.Fail("NullPointerException expected but not thrown");
+            }
+            catch (ArgumentNullException)
+            {
+            }
+        }
+
+        [TestCase]
+        public virtual void TestShouldFailForNullStream()
+        {
+            try
+            {
+                new Mp3File((Stream)null);
+                Assert.Fail("NullPointerException expected but not thrown");
+            }
+            catch (ArgumentNullException)
+            {
+            }
+        }	
 
         [TestCase]
 		public virtual void TestShouldLoadMp3WithNoTags()
@@ -203,6 +273,7 @@ namespace Mp3net
 			}
 		}
 
+
         [TestCase]
 		public virtual void TestShouldRemoveId3v1AndId3v2AndCustomTags()
 		{
@@ -343,11 +414,33 @@ namespace Mp3net
 			public Mp3FileForTesting(Mp3FileTest _enclosing, string filename)
 			{
 				this._enclosing = _enclosing;
-				RandomAccessFile file = new RandomAccessFile(filename, "r");
-				this.preScanResult = this.PreScanFile(file);
+				Stream stream = new FileStream (filename, System.IO.FileMode.Open, FileAccess.Read);
+				this.preScanResult = this.PreScanFile(stream);
 			}
 
 			private readonly Mp3FileTest _enclosing;
 		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [TestCase]
+        public virtual void TestMp3ID3v2FrameDetectionAlgorithm()
+        {
+            string filename = "Resources/test.mp3";
+            Mp3File mp3File = new Mp3File(filename);
+            Assert.Fail();
+        }
 	}
 }

@@ -67,11 +67,11 @@ namespace Mp3net
 			byte[] buffer = TestHelper.LoadFile("Resources/v1andv23tags.mp3");
 			ID3v2 id3v2tag = ID3v2TagFactory.CreateTag(buffer);
 			IDictionary<string, ID3v2FrameSet> frameSets = id3v2tag.GetFrameSets();
-			Iterator<ID3v2FrameSet> frameSetIterator = frameSets.Values.Iterator();
+			IEnumerator<ID3v2FrameSet> frameSetEnumerator = frameSets.Values.GetEnumerator();
 			string lastKey = string.Empty;
-			while (frameSetIterator.HasNext())
+			while (frameSetEnumerator.MoveNext())
 			{
-				ID3v2FrameSet frameSet = (ID3v2FrameSet)frameSetIterator.Next();
+				ID3v2FrameSet frameSet = (ID3v2FrameSet)frameSetEnumerator.Current;
                 Assert.IsTrue(String.CompareOrdinal(frameSet.GetId(), lastKey) > 0);
 				lastKey = frameSet.GetId();
 			}
@@ -85,18 +85,18 @@ namespace Mp3net
 			Assert.AreEqual("3.0", id3v2tag.GetVersion());
 			Assert.AreEqual(unchecked((int)(0x44B)), id3v2tag.GetLength());
 			Assert.AreEqual(12, id3v2tag.GetFrameSets().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TENC")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("WXXX")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TCOP")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TOPE")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TCOM")).GetFrames().Count);
-			Assert.AreEqual(2, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("COMM")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TPE1")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TALB")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TRCK")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TYER")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TCON")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TIT2")).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TENC"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["WXXX"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TCOP"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TOPE"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TCOM"]).GetFrames().Count);
+			Assert.AreEqual(2, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["COMM"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TPE1"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TALB"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TRCK"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TYER"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TCON"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TIT2"]).GetFrames().Count);
 		}
 
         [TestCase]
@@ -209,7 +209,7 @@ namespace Mp3net
 			ID3v2 id3tag = new ID3v23Tag();
 			SetTagFields(id3tag);
 			IDictionary<string, ID3v2FrameSet> frameSets = id3tag.GetFrameSets();
-			ID3v2FrameSet frameSet = (ID3v2FrameSet)frameSets.Get("TCON");
+			ID3v2FrameSet frameSet = (ID3v2FrameSet)frameSets["TCON"];
 			IList<ID3v2Frame> frames = frameSet.GetFrames();
 			ID3v2Frame frame = (ID3v2Frame)frames[0];
 			byte[] bytes = frame.GetData();
@@ -245,16 +245,16 @@ namespace Mp3net
 			Assert.AreEqual("2.0", id3v2tag.GetVersion());
 			Assert.AreEqual(unchecked((int)(0x3c5a2)), id3v2tag.GetLength());
 			Assert.AreEqual(10, id3v2tag.GetFrameSets().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TCM")).GetFrames().Count);
-			Assert.AreEqual(2, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("COM")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TP1")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TAL")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TRK")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TPA")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TYE")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("PIC")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TCO")).GetFrames().Count);
-			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets().Get("TT2")).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TCM"]).GetFrames().Count);
+			Assert.AreEqual(2, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["COM"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TP1"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TAL"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TRK"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TPA"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TYE"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["PIC"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TCO"]).GetFrames().Count);
+			Assert.AreEqual(1, ((ID3v2FrameSet)id3v2tag.GetFrameSets()["TT2"]).GetFrames().Count);
 		}
 
         [TestCase]

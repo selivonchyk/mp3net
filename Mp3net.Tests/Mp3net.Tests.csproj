@@ -45,7 +45,6 @@
     <Compile Include="BaseExceptionTest.cs" />
     <Compile Include="BufferToolsTest.cs" />
     <Compile Include="EncodedTextTest.cs" />
-    <Compile Include="FileWrapperTest.cs" />
     <Compile Include="ID3v1TagTest.cs" />
     <Compile Include="ID3v2ChapterFrameDataTest.cs" />
     <Compile Include="ID3v2ChapterTOCFrameDataTest.cs" />

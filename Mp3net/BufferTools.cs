@@ -7,8 +7,7 @@ namespace Mp3net
 	{
 		protected internal static readonly string defaultCharsetName = "ISO-8859-1";
 
-		public static string ByteBufferToStringIgnoringEncodingIssues(byte[] bytes, int offset
-			, int length)
+		public static string ByteBufferToStringIgnoringEncodingIssues(byte[] bytes, int offset, int length)
 		{
 			try
 			{
@@ -27,8 +26,7 @@ namespace Mp3net
 		}
 
 		/// <exception cref="System.IO.UnsupportedEncodingException"></exception>
-		public static string ByteBufferToString(byte[] bytes, int offset, int length, string
-			 charsetName)
+		public static string ByteBufferToString(byte[] bytes, int offset, int length, string charsetName)
 		{
 			if (length < 1)
 			{
@@ -37,8 +35,7 @@ namespace Mp3net
 			return Runtime.GetStringForBytes(bytes, offset, length, charsetName);
 		}
 
-		public static byte[] StringToByteBufferIgnoringEncodingIssues(string s, int offset
-			, int length)
+		public static byte[] StringToByteBufferIgnoringEncodingIssues(string s, int offset, int length)
 		{
 			try
 			{
@@ -57,8 +54,7 @@ namespace Mp3net
 		}
 
 		/// <exception cref="UnsupportedEncodingException"></exception>
-		public static byte[] StringToByteBuffer(string s, int offset, int length, string 
-			charsetName)
+		public static byte[] StringToByteBuffer(string s, int offset, int length, string charsetName)
 		{
 			string stringToCopy = s.Substring(offset, length);
 			byte[] bytes = Runtime.GetBytesForString(stringToCopy, charsetName);
@@ -66,15 +62,13 @@ namespace Mp3net
 		}
 
 		/// <exception cref="System.IO.UnsupportedEncodingException"></exception>
-		public static void StringIntoByteBuffer(string s, int offset, int length, byte[] 
-			bytes, int destOffset)
+		public static void StringIntoByteBuffer(string s, int offset, int length, byte[] bytes, int destOffset)
 		{
 			StringIntoByteBuffer(s, offset, length, bytes, destOffset, defaultCharsetName);
 		}
 
 		/// <exception cref="System.IO.UnsupportedEncodingException"></exception>
-		public static void StringIntoByteBuffer(string s, int offset, int length, byte[] 
-			bytes, int destOffset, string charsetName)
+		public static void StringIntoByteBuffer(string s, int offset, int length, byte[] bytes, int destOffset, string charsetName)
 		{
 			string stringToCopy = s.Substring(offset, length);
 			byte[] srcBytes = Runtime.GetBytesForString(stringToCopy, charsetName);
