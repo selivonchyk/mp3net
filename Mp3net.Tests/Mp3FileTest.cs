@@ -420,27 +420,5 @@ namespace Mp3net
 
 			private readonly Mp3FileTest _enclosing;
 		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        [TestCase]
-        public virtual void TestMp3ID3v2FrameDetectionAlgorithm()
-        {
-            string filename = "Resources/test.mp3";
-            Mp3File mp3File = new Mp3File(filename);
-            Assert.Fail();
-        }
 	}
 }
