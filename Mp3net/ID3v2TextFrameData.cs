@@ -8,15 +8,13 @@ namespace Mp3net
 		{
 		}
 
-		public ID3v2TextFrameData(bool unsynchronisation, EncodedText text) : base(unsynchronisation
-			)
+		public ID3v2TextFrameData(bool unsynchronisation, EncodedText text) : base(unsynchronisation)
 		{
 			this.text = text;
 		}
 
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		public ID3v2TextFrameData(bool unsynchronisation, byte[] bytes) : base(unsynchronisation
-			)
+		public ID3v2TextFrameData(bool unsynchronisation, byte[] bytes) : base(unsynchronisation)
 		{
 			SynchroniseAndUnpackFrameData(bytes);
 		}
@@ -24,8 +22,7 @@ namespace Mp3net
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
 		protected internal override void UnpackFrameData(byte[] bytes)
 		{
-			text = new EncodedText(bytes[0], BufferTools.CopyBuffer(bytes, 1, bytes.Length - 
-				1));
+			text = new EncodedText(bytes[0], BufferTools.CopyBuffer(bytes, 1, bytes.Length - 1));
 		}
 
 		protected internal override byte[] PackFrameData()

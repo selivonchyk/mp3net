@@ -23,15 +23,26 @@ namespace Mp3net
 
 		public static readonly string CHARSET_UTF_8 = "UTF-8";
 
+        /* original 
 		private static readonly string[] characterSets = new string[] {
             CHARSET_ISO_8859_1, 
             CHARSET_UTF_16, 
             CHARSET_UTF_16BE, 
             CHARSET_UTF_8
         };
+        */
+
+        private static readonly string[] characterSets = new string[] {
+            CHARSET_ISO_8859_1, 
+            CHARSET_UTF_16BE, 
+            CHARSET_UTF_16, 
+            CHARSET_UTF_8
+        };
+
 
 		private static readonly byte[] textEncodingFallback = new byte[] { 0, 2, 1, 3 };
 
+        /* original
 		private static readonly byte[][] boms = new byte[][] { 
             new byte[] {  }, 
             new byte[] { 
@@ -44,6 +55,21 @@ namespace Mp3net
             }, 
             new byte[] {  } 
         };
+        */
+
+        private static readonly byte[][] boms = new byte[][] { 
+            new byte[] {  }, 
+            new byte[] { 
+                unchecked((byte)unchecked((int)(0xfe))), 
+                unchecked((byte)unchecked((int)(0xff))) 
+            }, 
+            new byte[] { 
+                unchecked((byte)unchecked((int)(0xff))), 
+                unchecked((byte)unchecked((int)(0xfe))) 
+            }, 
+            new byte[] {  } 
+        };
+
 
 		private static readonly byte[][] terminators = new byte[][] { 
             new byte[] { 0 }, 
@@ -87,6 +113,8 @@ namespace Mp3net
 
 		public EncodedText(byte textEncoding, string @string)
 		{
+            if (textEncoding == 0)
+                textEncoding = 1; // Use UTF-16 instead of ISO-8859-1/Windows-1251
 			this.textEncoding = textEncoding;
 			value = StringToBytes(@string, CharacterSetForTextEncoding(textEncoding));
 			this.StripBomAndTerminator();
@@ -322,9 +350,7 @@ namespace Mp3net
 		internal static string BytesToCharBuffer(byte[] bytes, string characterSet)
 		{
 			Encoding charset = GetEncoding(characterSet);
-		    //char[] chars = charset.GetChars(bytes);
-			CharsetDecoder decoder = new CharsetDecoder (charset);
-			return decoder.Decode(ByteBuffer.Wrap(bytes));
+            return charset.GetString(bytes);
 		}
 
 		public static byte[] StringToBytes(string s, string characterSet)
@@ -350,7 +376,6 @@ namespace Mp3net
 		static UTF8Encoding UTF8Encoder = new UTF8Encoding (false, true);
 		public static Encoding GetEncoding (string name)
 		{
-//			Encoding e = Encoding.GetEncoding (name, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
 			try {
 				Encoding e = Encoding.GetEncoding (name.Replace ('_','-'));
 				if (e is UTF8Encoding)

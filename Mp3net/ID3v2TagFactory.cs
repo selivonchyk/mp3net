@@ -1,3 +1,5 @@
+using System;
+
 namespace Mp3net
 {
 	public class ID3v2TagFactory

@@ -136,6 +136,7 @@ namespace Mp3net
             }
             this.bufferLength = bufferLength;
             this.scanFile = scanFile;
+            this.length = stream.Length;
             InitStream();
         }
 
@@ -298,7 +299,6 @@ namespace Mp3net
 
 		private int ScanBlockForStart(byte[] bytes, int bytesRead, int absoluteOffset, int offset)
 		{
-            Console.WriteLine("ScanBlockForStart: offset: {0}, absoluteOffset: {1}", offset, absoluteOffset);
 			while (offset < bytesRead - MINIMUM_BUFFER_LENGTH)
 			{
 				if (bytes[offset] == unchecked((byte)unchecked((int)(0xFF))) &&
@@ -306,14 +306,12 @@ namespace Mp3net
 				{
 					try
 					{
-                        Console.WriteLine("Mpeg frame start bytes: {0}, {1}, {2}, {3}", bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
 						MpegFrame frame = new MpegFrame(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
 						if (xingOffset < 0 && IsXingFrame(bytes, offset))
 						{
 							xingOffset = absoluteOffset + offset;
 							xingBitrate = frame.GetBitrate();
 							offset += frame.GetLengthInBytes();
-                            Console.WriteLine("frame length: {0}, xingOffset: {1}, offset: {2}, absoluteOffset: {3}", frame.GetLengthInBytes(), xingOffset, offset, absoluteOffset);
 						}
 						else
 						{
@@ -329,7 +327,6 @@ namespace Mp3net
 							frameCount++;
 							AddBitrate(frame.GetBitrate());
 							offset += frame.GetLengthInBytes();
-                            Console.WriteLine("frame length: {0}, offset: {1}, absoluteOffset: {2}", frame.GetLengthInBytes(), offset, absoluteOffset);
 							return offset;
 						}
 					}

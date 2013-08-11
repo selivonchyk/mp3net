@@ -214,15 +214,12 @@ namespace Mp3net
 
 		private int UnpackExtendedHeader(byte[] bytes, int offset)
 		{
-			extendedHeaderLength = BufferTools.UnpackSynchsafeInteger(bytes[offset], bytes[offset
-				 + 1], bytes[offset + 2], bytes[offset + 3]) + 4;
-			extendedHeaderData = BufferTools.CopyBuffer(bytes, offset + 4, extendedHeaderLength
-				);
+			extendedHeaderLength = BufferTools.UnpackSynchsafeInteger(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]) + 4;
+			extendedHeaderData = BufferTools.CopyBuffer(bytes, offset + 4, extendedHeaderLength);
 			return extendedHeaderLength;
 		}
 
-		protected internal virtual int UnpackFrames(byte[] bytes, int offset, int framesLength
-			)
+		protected internal virtual int UnpackFrames(byte[] bytes, int offset, int framesLength)
 		{
 			int currentOffset = offset;
 			while (currentOffset <= framesLength)
@@ -232,6 +229,10 @@ namespace Mp3net
 				{
 					frame = CreateFrame(bytes, currentOffset);
 					AddFrame(frame, false);
+
+                    int frameSize = frame.GetLength();
+                    byte[] frameBytes = new byte[frameSize];
+                    Buffer.BlockCopy(bytes, currentOffset, frameBytes, 0, frameSize);
 					currentOffset += frame.GetLength();
 				}
 				catch (InvalidDataException)
@@ -269,8 +270,7 @@ namespace Mp3net
 		}
 
 		/// <exception cref="Mp3net.InvalidDataException"></exception>
-		protected internal virtual ID3v2Frame CreateFrame(byte[] bytes, int currentOffset
-			)
+		protected internal virtual ID3v2Frame CreateFrame(byte[] bytes, int currentOffset)
 		{
 			if (obseleteFormat)
 			{
@@ -558,8 +558,10 @@ namespace Mp3net
 			if (track != null && track.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(track));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+                    UseFrameUnsynchronisation(),
+                    new EncodedText((byte)0, track)
+                );
 				AddFrame(CreateFrame(ID_TRACK, frameData.ToBytes()), true);
 			}
 		}
@@ -643,8 +645,10 @@ namespace Mp3net
 			if (artist != null && artist.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(artist));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+					UseFrameUnsynchronisation(),
+					new EncodedText(artist)
+				);
 				AddFrame(CreateFrame(ID_ARTIST, frameData.ToBytes()), true);
 			}
 		}
@@ -701,8 +705,10 @@ namespace Mp3net
 			if (title != null && title.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(title));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+					UseFrameUnsynchronisation(),
+					new EncodedText(title)
+				);
 				AddFrame(CreateFrame(ID_TITLE, frameData.ToBytes()), true);
 			}
 		}
@@ -730,8 +736,10 @@ namespace Mp3net
 			if (album != null && album.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(album));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+					UseFrameUnsynchronisation(),
+					new EncodedText(album)
+				);
 				AddFrame(CreateFrame(ID_ALBUM, frameData.ToBytes()), true);
 			}
 		}
@@ -759,8 +767,10 @@ namespace Mp3net
 			if (year != null && year.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(year));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+					UseFrameUnsynchronisation(),
+					new EncodedText(year)
+				);
 				AddFrame(CreateFrame(ID_YEAR, frameData.ToBytes()), true);
 			}
 		}
@@ -821,8 +831,10 @@ namespace Mp3net
 					genreDescription = string.Empty;
 				}
 				string combinedGenre = "(" + genre.ToString() + ")" + genreDescription;
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(combinedGenre));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+					UseFrameUnsynchronisation(),
+					new EncodedText(combinedGenre)
+				);
 				AddFrame(CreateFrame(ID_GENRE, frameData.ToBytes()), true);
 			}
 		}
@@ -925,8 +937,12 @@ namespace Mp3net
 			if (comment != null && comment.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2CommentFrameData frameData = new ID3v2CommentFrameData(UseFrameUnsynchronisation
-					(), "eng", null, new EncodedText(comment));
+				ID3v2CommentFrameData frameData = new ID3v2CommentFrameData(
+					UseFrameUnsynchronisation(), 
+					"eng",
+					null,
+					new EncodedText(comment)
+				);
 				AddFrame(CreateFrame(ID_COMMENT, frameData.ToBytes()), true);
 			}
 		}
@@ -954,8 +970,12 @@ namespace Mp3net
 			if (itunesComment != null && itunesComment.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2CommentFrameData frameData = new ID3v2CommentFrameData(UseFrameUnsynchronisation
-					(), ITUNES_COMMENT_DESCRIPTION, null, new EncodedText(itunesComment));
+				ID3v2CommentFrameData frameData = new ID3v2CommentFrameData(
+					UseFrameUnsynchronisation(),
+					ITUNES_COMMENT_DESCRIPTION,
+					null,
+					new EncodedText(itunesComment)
+				);
 				AddFrame(CreateFrame(ID_COMMENT, frameData.ToBytes()), true);
 			}
 		}
@@ -983,8 +1003,10 @@ namespace Mp3net
 			if (composer != null && composer.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(composer));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+					UseFrameUnsynchronisation(),
+					new EncodedText(composer)
+				);
 				AddFrame(CreateFrame(ID_COMPOSER, frameData.ToBytes()), true);
 			}
 		}
@@ -1041,8 +1063,10 @@ namespace Mp3net
 			if (originalArtist != null && originalArtist.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(originalArtist));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+					UseFrameUnsynchronisation(),
+					new EncodedText(originalArtist)
+				);
 				AddFrame(CreateFrame(ID_ORIGINAL_ARTIST, frameData.ToBytes()), true);
 			}
 		}
@@ -1188,8 +1212,10 @@ namespace Mp3net
 			if (encoder != null && encoder.Length > 0)
 			{
 				InvalidateDataLength();
-				ID3v2TextFrameData frameData = new ID3v2TextFrameData(UseFrameUnsynchronisation()
-					, new EncodedText(encoder));
+				ID3v2TextFrameData frameData = new ID3v2TextFrameData(
+					UseFrameUnsynchronisation(),
+					new EncodedText(encoder)
+				);
 				AddFrame(CreateFrame(ID_ENCODER, frameData.ToBytes()), true);
 			}
 		}
@@ -1252,8 +1278,8 @@ namespace Mp3net
 
 		private IList<ID3v2ChapterFrameData> ExtractChapterFrameData(string id)
 		{
-			ID3v2FrameSet frameSet = frameSets[id];
-			if (frameSet != null)
+			ID3v2FrameSet frameSet = null;
+			if (frameSets.TryGetValue(id, out frameSet) && frameSet != null)
 			{
 				IList<ID3v2ChapterFrameData> chapterData = new List<ID3v2ChapterFrameData>();
 				IList<ID3v2Frame> frames = frameSet.GetFrames();
@@ -1277,8 +1303,8 @@ namespace Mp3net
 
 		private IList<ID3v2ChapterTOCFrameData> ExtractChapterTOCFrameData(string id)
 		{
-			ID3v2FrameSet frameSet = frameSets[id];
-			if (frameSet != null)
+			ID3v2FrameSet frameSet = null;
+			if (frameSets.TryGetValue(id, out frameSet) && frameSet != null)
 			{
 				IList<ID3v2ChapterTOCFrameData> chapterData = new List<ID3v2ChapterTOCFrameData>();
 				IList<ID3v2Frame> frames = frameSet.GetFrames();
@@ -1302,8 +1328,8 @@ namespace Mp3net
 
 		private ID3v2TextFrameData ExtractTextFrameData(string id)
 		{
-			ID3v2FrameSet frameSet = frameSets[id];
-			if (frameSet != null)
+			ID3v2FrameSet frameSet = null;
+			if (frameSets.TryGetValue(id, out frameSet) && frameSet != null)
 			{
 				ID3v2Frame frame = (ID3v2Frame)frameSet.GetFrames()[0];
 				ID3v2TextFrameData frameData;
@@ -1322,8 +1348,8 @@ namespace Mp3net
 
 		private ID3v2UrlFrameData ExtractUrlFrameData(string id)
 		{
-			ID3v2FrameSet frameSet = frameSets[id];
-			if (frameSet != null)
+			ID3v2FrameSet frameSet = null;
+			if (frameSets.TryGetValue(id, out frameSet) && frameSet != null)
 			{
 				ID3v2Frame frame = (ID3v2Frame)frameSet.GetFrames()[0];
 				ID3v2UrlFrameData frameData;
@@ -1342,8 +1368,8 @@ namespace Mp3net
 
 		private ID3v2CommentFrameData ExtractCommentFrameData(string id, bool itunes)
 		{
-			ID3v2FrameSet frameSet = frameSets[id];
-			if (frameSet != null)
+			ID3v2FrameSet frameSet = null;
+			if (frameSets.TryGetValue(id, out frameSet) && frameSet != null)
 			{
 				IEnumerator<ID3v2Frame> enumerator = frameSet.GetFrames().GetEnumerator();
 				while (enumerator.MoveNext())
@@ -1378,8 +1404,8 @@ namespace Mp3net
 
 		private ID3v2PictureFrameData CreatePictureFrameData(string id)
 		{
-			ID3v2FrameSet frameSet = frameSets[id];
-			if (frameSet != null)
+			ID3v2FrameSet frameSet = null;
+			if (frameSets.TryGetValue(id, out frameSet) && frameSet != null)
 			{
 				ID3v2Frame frame = (ID3v2Frame)frameSet.GetFrames()[0];
 				ID3v2PictureFrameData frameData;

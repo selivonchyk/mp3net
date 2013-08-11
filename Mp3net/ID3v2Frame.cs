@@ -77,8 +77,7 @@ namespace Mp3net
 
 		protected internal virtual int UnpackHeader(byte[] buffer, int offset)
 		{
-			id = BufferTools.ByteBufferToStringIgnoringEncodingIssues(buffer, offset + ID_OFFSET
-				, ID_LENGTH);
+			id = BufferTools.ByteBufferToStringIgnoringEncodingIssues(buffer, offset + ID_OFFSET, ID_LENGTH);
 			UnpackDataLength(buffer, offset);
 			UnpackFlags(buffer, offset);
 			return offset + HEADER_LENGTH;

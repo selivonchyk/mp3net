@@ -9,8 +9,5 @@
     <projectUrl>http://code.google.com/p/ude/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Compiled version of "C# port of Mozilla Universal Charset Detector"</description>
-    <releaseNotes />
-    <copyright />
-    <language />
   </metadata>
 </package>
